@@ -4,7 +4,7 @@ use std::{
 };
 use strum_macros::EnumIter;
 
-#[derive(Debug, Copy, Clone, EnumIter)]
+#[derive(Debug, Copy, Clone, EnumIter, PartialEq)]
 pub enum Suit {
     Clubs,
     Diamonds,
@@ -12,7 +12,7 @@ pub enum Suit {
     Spades,
 }
 
-#[derive(Debug, Clone, Copy, EnumIter)]
+#[derive(Debug, Clone, Copy, EnumIter, PartialEq)]
 pub enum Rank {
     Ace = 1,
     Two = 2,
@@ -27,6 +27,12 @@ pub enum Rank {
     Jack = 11,
     Queen = 12,
     King = 13,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Colour {
+    Black,
+    Red,
 }
 pub struct Card {
     rank: Rank,
@@ -43,6 +49,13 @@ impl Card {
 
     pub fn suit(&self) -> Suit {
         self.suit
+    }
+
+    pub fn colour(&self) -> Colour {
+        match self.suit {
+            Suit::Clubs | Suit::Spades => Colour::Black,
+            Suit::Diamonds | Suit::Hearts => Colour::Red,
+        }
     }
 }
 impl Display for Suit {
@@ -61,10 +74,11 @@ impl Display for Suit {
 impl Display for Rank {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let rank = match self {
-            Rank::Ace => "A",
-            Rank::Jack => "J",
-            Rank::Queen => "Q",
-            Rank::King => "K",
+            Rank::Ace => " A",
+            Rank::Jack => " J",
+            Rank::Queen => " Q",
+            Rank::King => " K",
+            r if r != &Rank::Ten => &format!(" {}", *r as u8),
             r => &format!("{}", *r as u8),
         };
         write!(f, "{}", rank)
@@ -72,6 +86,12 @@ impl Display for Rank {
 }
 impl Display for Card {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "{}{}", self.suit, self.rank)
+        let card = format!("{}{}", self.rank, self.suit);
+
+        let ansi = match self.colour() {
+            Colour::Red => ansi_term::Colour::Red.paint(card),
+            Colour::Black => ansi_term::Colour::White.paint(card),
+        };
+        write!(f, "{}", ansi)
     }
 }
