@@ -1,6 +1,6 @@
 pub mod card;
 
-use std::fmt::Display;
+use std::fmt::{Display, Formatter, Result};
 
 use card::{Card, Rank, Suit};
 use rand::{rng, seq::SliceRandom};
@@ -12,16 +12,32 @@ pub struct Deck {
 
 impl Deck {
     pub fn new() -> Deck {
-        let mut cards: Vec<Card> = Suit::iter()
+        let mut cards = Suit::iter()
             .flat_map(|suit| Rank::iter().map(move |rank| Card::new(rank, suit)))
-            .collect();
+            .collect::<Vec<Card>>();
+
         cards.shuffle(&mut rng());
         Deck { cards }
+    }
+
+    pub fn pick_card(&mut self) -> Option<Card> {
+        self.cards.pop()
+    }
+
+    pub fn pick_cards(&mut self, number: u8) -> Vec<Card> {
+        let options = (0..number)
+            .map(move |_| self.pick_card())
+            .collect::<Vec<Option<Card>>>();
+        let cards = options.iter().filter_map(|option| *option).collect();
+        cards
     }
 }
 
 impl Display for Deck {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        if self.cards.is_empty() {
+            return write!(f, "   ");
+        }
         let s: String = self
             .cards
             .iter()

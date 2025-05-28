@@ -34,6 +34,8 @@ pub enum Colour {
     Black,
     Red,
 }
+
+#[derive(Debug, Clone, Copy)]
 pub struct Card {
     rank: Rank,
     suit: Suit,
