@@ -28,8 +28,12 @@ impl Deck {
         let options = (0..number)
             .map(move |_| self.pick_card())
             .collect::<Vec<Option<Card>>>();
-        let cards = options.iter().filter_map(|option| *option).collect();
+        let cards = options.iter().filter_map(|option| option.clone()).collect();
         cards
+    }
+
+    pub fn pick_all_cards(self) -> Vec<Card> {
+        self.cards
     }
 }
 

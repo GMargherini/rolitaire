@@ -2,9 +2,9 @@ use std::{
     fmt::{Display, Error, Formatter},
     u8,
 };
-use strum_macros::EnumIter;
+use strum_macros::{EnumIter, FromRepr};
 
-#[derive(Debug, Copy, Clone, EnumIter, PartialEq)]
+#[derive(Debug, Copy, Clone, EnumIter, PartialEq, Eq, Hash)]
 pub enum Suit {
     Clubs,
     Diamonds,
@@ -12,7 +12,7 @@ pub enum Suit {
     Spades,
 }
 
-#[derive(Debug, Clone, Copy, EnumIter, PartialEq)]
+#[derive(Debug, Clone, Copy, EnumIter, PartialEq, Eq, FromRepr)]
 pub enum Rank {
     Ace = 1,
     Two = 2,
@@ -29,20 +29,39 @@ pub enum Rank {
     King = 13,
 }
 
-#[derive(Debug, Clone, Copy)]
+impl Rank {
+    pub fn is_next(r1: &Rank, r2: &Rank) -> bool {
+        match r2 {
+            Rank::King => false,
+            _ => &Rank::from_repr((*r2 as usize) + 1).unwrap() == r1,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum State {
+    Covered,
+    Uncovered,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Colour {
     Black,
     Red,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Card {
     rank: Rank,
     suit: Suit,
+    state: State,
 }
 impl Card {
     pub fn new(rank: Rank, suit: Suit) -> Self {
-        Card { rank, suit }
+        Card {
+            rank,
+            suit,
+            state: State::Covered,
+        }
     }
 
     pub fn rank(&self) -> Rank {
@@ -57,6 +76,20 @@ impl Card {
         match self.suit {
             Suit::Clubs | Suit::Spades => Colour::Black,
             Suit::Diamonds | Suit::Hearts => Colour::Red,
+        }
+    }
+
+    pub fn is_covered(&self) -> bool {
+        match self.state {
+            State::Covered => true,
+            State::Uncovered => false,
+        }
+    }
+
+    pub fn flip(&mut self) {
+        self.state = match self.state {
+            State::Covered => State::Uncovered,
+            State::Uncovered => State::Covered,
         }
     }
 }
@@ -88,6 +121,9 @@ impl Display for Rank {
 }
 impl Display for Card {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        if self.is_covered() {
+            return write!(f, "\u{2587}\u{2587}\u{2587}");
+        }
         let card = format!("{}{}", self.rank, self.suit);
 
         let ansi = match self.colour() {
