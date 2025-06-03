@@ -22,7 +22,7 @@ pub fn print_table(table: &Table) {
         .map(|i| table.lane(i))
         .collect::<Vec<Ref<'_, Pile>>>();
     lanes.iter().for_each(|lane| print!(" {}\t", lane));
-    println!("");
+    println!();
     let lines = lanes
         .iter()
         .max_by(|l1, l2| l1.length().cmp(&l2.length()))

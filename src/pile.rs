@@ -21,9 +21,8 @@ impl Pile {
     }
 
     pub fn flip_top_card(&mut self) {
-        match self.cards.last_mut() {
-            Some(card) => card.flip(),
-            None => (),
+        if let Some(card) = self.cards.last_mut() {
+            card.flip()
         }
     }
 
@@ -77,23 +76,19 @@ impl Pile {
 
     pub fn can_remove(&self, card: &Card) -> bool {
         match self.pile_type {
-            PileType::Draw => self.cards.contains(&card) && card.is_covered(),
-            _ => self.cards.contains(&card) && !card.is_covered(),
+            PileType::Draw => self.cards.contains(card) && card.is_covered(),
+            _ => self.cards.contains(card) && !card.is_covered(),
         }
     }
 
     pub fn remove_card(&mut self, card: &Card) {
-        match self.cards.iter().position(|c| c == card) {
-            Some(index) => {
-                self.cards.remove(index);
-            }
-            None => (),
+        if let Some(index) = self.cards.iter().position(|c| c == card) {
+            self.cards.remove(index);
         };
     }
 
     pub fn remove_cards(&mut self, n: usize) -> Vec<Card> {
-        let removed = self.cards.split_off(self.cards.len() - n);
-        Vec::from(removed)
+        self.cards.split_off(self.cards.len() - n)
     }
 
     pub fn remove_all_cards(&mut self) -> Vec<Card> {

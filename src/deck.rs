@@ -28,8 +28,7 @@ impl Deck {
         let options = (0..number)
             .map(move |_| self.pick_card())
             .collect::<Vec<Option<Card>>>();
-        let cards = options.iter().filter_map(|option| option.clone()).collect();
-        cards
+        options.iter().filter_map(|option| *option).collect()
     }
 
     pub fn pick_all_cards(self) -> Vec<Card> {
@@ -45,8 +44,14 @@ impl Display for Deck {
         let s: String = self
             .cards
             .iter()
-            .map(|card| format!("{}\n", card.to_string()))
+            .map(|card| format!("{}\n", card))
             .collect();
         write!(f, "{}", s)
+    }
+}
+
+impl Default for Deck {
+    fn default() -> Self {
+        Self::new()
     }
 }

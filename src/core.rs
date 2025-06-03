@@ -80,7 +80,7 @@ impl Table {
         match pile_type {
             PileType::Draw => PileRef::clone(&self.draw_pile),
             PileType::Uncovered => PileRef::clone(&self.uncovered_pile),
-            PileType::Lane(i) => PileRef::clone(self.lanes.get((i - 1) as usize).unwrap()),
+            PileType::Lane(i) => PileRef::clone(self.lanes.get(i - 1).unwrap()),
             PileType::Suit(suit) => PileRef::clone(self.suit_piles.get(&suit).unwrap()),
         }
     }
@@ -114,19 +114,16 @@ impl Table {
     pub fn move_top_card(&self, from: PileRef, to: PileRef) -> Result<(), Box<dyn Error>> {
         let mut from = from.try_borrow_mut()?;
         let mut to = to.try_borrow_mut()?;
-        let mut card = from.top_card().ok_or(fmt::Error)?.clone();
+        let mut card = *from.top_card().ok_or(fmt::Error)?;
         let can_move = to.can_add(&card) && from.can_remove(&card);
 
         if can_move {
             let from_type = from.pile_type();
             match from_type {
                 PileType::Draw => {
-                    println!("drawing");
                     card.flip();
                     to.add_card(card);
-                    println!("card added");
                     from.remove_top_card();
-                    println!("card removed");
                 }
                 _ => {
                     from.remove_top_card();
@@ -166,23 +163,28 @@ impl Table {
         Ok(())
     }
 
-    pub fn move_all_cards(&self, from: PileRef, to: PileRef) {
-        let mut from = from.borrow_mut();
-        let mut to = to.borrow_mut();
+    pub fn move_all_cards(&self, from: PileRef, to: PileRef) -> Result<(), Box<dyn Error>> {
+        let mut from = from.try_borrow_mut()?;
+        let mut to = to.try_borrow_mut()?;
         to.add_all_cards(&mut from.remove_all_cards());
+        Ok(())
     }
 
     pub fn draw_card(&self) -> Result<(), Box<dyn Error>> {
-        match self.draw_pile.borrow().top_card() {
-            Some(top_card) => self.move_card(
-                top_card.clone(),
-                Rc::clone(&self.draw_pile),
-                Rc::clone(&self.uncovered_pile),
-            ),
-            None if self.uncovered_pile.borrow().is_empty() => Ok(()),
+        let mut draw_pile = self.draw_pile.try_borrow_mut()?;
+        let mut uncovered_pile = self.uncovered_pile.try_borrow_mut()?;
+        match draw_pile.top_card() {
+            Some(top_card) => {
+                let mut card = *top_card;
+                card.flip();
+                uncovered_pile.add_card(card);
+                draw_pile.remove_top_card();
+                Ok(())
+            }
+            None if uncovered_pile.is_empty() => Ok(()),
             None => {
-                self.move_all_cards(self.uncovered_pile.clone(), self.draw_pile.clone());
-                self.draw_pile.try_borrow_mut()?.flip_all_cards();
+                draw_pile.add_all_cards(&mut uncovered_pile.remove_all_cards());
+                draw_pile.flip_all_cards();
                 Ok(())
             }
         }
@@ -204,20 +206,13 @@ impl Table {
         let index = is_valid
             .into_iter()
             .enumerate()
-            .map(|(i, v)| {
-                if v {
-                    return (i + 1) as u8;
-                } else {
-                    return 0 as u8;
-                }
-            })
+            .map(|(i, v)| if v { (i + 1) as u8 } else { 0_u8 })
             .filter(|i| *i != 0)
             .collect::<Vec<u8>>();
         let index = index.first().unwrap_or(&0);
         self.move_cards(*index as usize, from, to)
     }
 }
-
 
 pub struct Game {
     table: Table,
@@ -235,23 +230,19 @@ impl Game {
 
     pub fn play(&mut self, game_move: Move) -> Result<(), Box<dyn Error>> {
         match game_move {
-            Move::DrawCard => self.table.move_cards(
-                1,
-                self.table.get_pile(PileType::Draw),
-                self.table.get_pile(PileType::Uncovered),
-            ),
+            Move::DrawCard => self.table.draw_card(),
             Move::AutoMove(from, to) => self
                 .table
                 .auto_move(self.table.get_pile(from), self.table.get_pile(to)),
             Move::MoveCards(n, from, to) => {
                 self.table
                     .move_cards(n, self.table.get_pile(from), self.table.get_pile(to))
-            },
+            }
             Move::Invalid => {
                 let color_text = ansi_term::Color::Red.paint("Invalid move, try again");
                 println!("{}", color_text);
                 Ok(())
-            },
+            }
             m => {
                 println!("{:?}", m);
                 Ok(())
@@ -262,9 +253,14 @@ impl Game {
     pub fn is_over(&self) -> bool {
         self.table()
             .suit_piles
-            .iter()
-            .map(|(_, pile)| pile.borrow().length() == 13)
-            .fold(true, |x, y| x && y)
+            .values()
+            .all(|pile| pile.borrow().length() == 13)
+    }
+}
+
+impl Default for Game {
+    fn default() -> Self {
+        Game::new()
     }
 }
 

@@ -43,28 +43,22 @@ impl From<String> for Move {
                 "U" => Move::Undo,
                 _ => Move::Invalid,
             },
-            2 => match &item[..] {
-                piles => {
-                    let ps = Move::parse_piles(piles);
-                    match &ps[..] {
-                        [Some(a), Some(b)] => Move::AutoMove(*a, *b),
-                        _ => Move::Invalid,
-                    }
+            2 => {
+                let piles = Move::parse_piles(&item[..]);
+                match &piles[..] {
+                    [Some(a), Some(b)] => Move::AutoMove(*a, *b),
+                    _ => Move::Invalid,
                 }
-            },
-            3 | 4 => match (&item[..2], &item[2..]) {
-                (piles, number) => {
-                    let n: usize = match number.parse() {
-                        Ok(result) => result,
-                        Err(_) => 0,
-                    };
-                    let ps = Move::parse_piles(piles);
-                    match &ps[..] {
-                        [Some(a), Some(b)] => Move::MoveCards(n, *a, *b),
-                        _ => Move::Invalid,
-                    }
+            }
+            3 | 4 => {
+                let (piles, number) = (&item[..2], &item[2..]);
+                let n: usize = number.parse().unwrap_or(0);
+                let ps = Move::parse_piles(piles);
+                match &ps[..] {
+                    [Some(a), Some(b)] => Move::MoveCards(n, *a, *b),
+                    _ => Move::Invalid,
                 }
-            },
+            }
             _ => Move::Invalid,
         };
         println!("{:?}", m);

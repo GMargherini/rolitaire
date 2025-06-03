@@ -1,7 +1,4 @@
-use std::{
-    fmt::{Display, Error, Formatter},
-    u8,
-};
+use std::fmt::{Display, Error, Formatter};
 use strum_macros::{EnumIter, FromRepr};
 
 #[derive(Debug, Copy, Clone, EnumIter, PartialEq, Eq, Hash)]
