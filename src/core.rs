@@ -90,22 +90,10 @@ impl Table {
         let mut to = to.try_borrow_mut()?;
         let can_move = to.can_add(&card) && from.can_remove(&card);
         if can_move {
-            let from_type = from.pile_type();
-            match from_type {
-                PileType::Draw => {
-                    println!("drawing");
-                    to.add_card(card);
-                    println!("card added");
-                    from.remove_top_card();
-                    println!("card removed");
-                }
-                _ => {
-                    from.remove_card(&card);
-                    to.add_card(card);
-                    if from.top_card_is_covered() {
-                        from.flip_top_card();
-                    }
-                }
+            from.remove_card(&card);
+            to.add_card(card);
+            if from.top_card_is_covered() {
+                from.flip_top_card();
             }
         }
         Ok(())
@@ -163,13 +151,6 @@ impl Table {
         Ok(())
     }
 
-    pub fn move_all_cards(&self, from: PileRef, to: PileRef) -> Result<(), Box<dyn Error>> {
-        let mut from = from.try_borrow_mut()?;
-        let mut to = to.try_borrow_mut()?;
-        to.add_all_cards(&mut from.remove_all_cards());
-        Ok(())
-    }
-
     pub fn draw_card(&self) -> Result<(), Box<dyn Error>> {
         let mut draw_pile = self.draw_pile.try_borrow_mut()?;
         let mut uncovered_pile = self.uncovered_pile.try_borrow_mut()?;
@@ -184,6 +165,7 @@ impl Table {
             None if uncovered_pile.is_empty() => Ok(()),
             None => {
                 draw_pile.add_all_cards(&mut uncovered_pile.remove_all_cards());
+                draw_pile.reverse();
                 draw_pile.flip_all_cards();
                 Ok(())
             }
@@ -194,14 +176,18 @@ impl Table {
         if number == 0 {
             return false;
         }
-        match from.borrow().card(from.borrow().length() - number) {
+        let from = from.borrow();
+        match from.card(from.length() - number) {
             Some(card) => to.borrow().can_add(card),
             None => true,
         }
     }
 
     pub fn auto_move(&self, from: PileRef, to: PileRef) -> Result<(), Box<dyn Error>> {
-        let is_valid = (1..to.borrow().length())
+        if from.borrow().pile_type() == PileType::Uncovered {
+            return self.move_top_card(from, to);
+        }
+        let is_valid = (1..=from.borrow().length())
             .map(|n| self.is_move_valid(n, Rc::clone(&from), Rc::clone(&to)));
         let index = is_valid
             .into_iter()

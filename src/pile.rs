@@ -2,7 +2,7 @@ use std::fmt::{Display, Error, Formatter};
 
 use crate::deck::card::{self, Card, Rank};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PileType {
     Lane(usize),
     Suit(card::Suit),
@@ -118,6 +118,10 @@ impl Pile {
 
     pub fn is_empty(&self) -> bool {
         self.cards.is_empty()
+    }
+
+    pub fn reverse(&mut self) {
+        self.cards.reverse();
     }
 }
 
