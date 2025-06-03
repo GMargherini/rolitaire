@@ -9,7 +9,7 @@ pub enum PileType {
     Draw,
     Uncovered,
 }
-
+#[derive(Debug)]
 pub struct Pile {
     cards: Vec<Card>,
     pile_type: PileType,
@@ -39,6 +39,11 @@ impl Pile {
         self.cards.get(index)
     }
 
+    pub fn get_cards(&self, number: usize) -> Vec<Card> {
+        let removed = self.cards.split_at(self.cards.len() - number).1;
+        Vec::from(removed)
+    }
+
     pub fn cards(self) -> Vec<Card> {
         self.cards
     }
@@ -52,11 +57,11 @@ impl Pile {
     }
     pub fn can_add(&self, card: &Card) -> bool {
         match self.pile_type {
-            PileType::Uncovered => false,
+            PileType::Uncovered => true,
             PileType::Draw => true,
             PileType::Suit(suit) => match self.top_card() {
                 Some(top_card) => {
-                    card.suit() == suit && Rank::is_next(&top_card.rank(), &card.rank())
+                    card.suit() == suit && Rank::is_next(&card.rank(), &top_card.rank())
                 }
                 None => card.suit() == suit && card.rank() == Rank::Ace,
             },
@@ -105,10 +110,8 @@ impl Pile {
         self.cards.append(cards);
     }
 
-    pub fn remove_top_card(&mut self) {
-        if !self.cards.is_empty() {
-            self.cards.pop();
-        }
+    pub fn remove_top_card(&mut self) -> Option<Card> {
+        self.cards.pop()
     }
 
     pub fn top_card_is_covered(&self) -> bool {

@@ -11,7 +11,12 @@ fn main() -> Result<()> {
             Err(_) => "".to_string(),
         };
         let next_move = Move::from(input);
-        game.play(next_move);
+        match game.play(next_move) {
+            Ok(_) => (),
+            Err(e) => {
+                eprintln!("{} {:?}", e, e.source());
+            }
+        }
     }
     clear_screen();
     println!("{game}");

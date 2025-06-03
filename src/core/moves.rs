@@ -34,7 +34,7 @@ impl Move {
 impl From<String> for Move {
     fn from(item: String) -> Move {
         let item = item.trim().to_uppercase();
-        match item.len() {
+        let m = match item.len() {
             1 => match &item[..] {
                 "D" => Move::DrawCard,
                 "H" => Move::Help,
@@ -66,6 +66,8 @@ impl From<String> for Move {
                 }
             },
             _ => Move::Invalid,
-        }
+        };
+        println!("{:?}", m);
+        m
     }
 }
