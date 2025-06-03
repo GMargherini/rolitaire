@@ -1,5 +1,5 @@
 use crate::pile::Pile;
-use core::{Game, Table};
+use core::{Game, table::Table};
 use std::cell::Ref;
 use strum::IntoEnumIterator;
 

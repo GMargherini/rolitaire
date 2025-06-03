@@ -1,7 +1,7 @@
 use crate::deck::card::Suit;
 use crate::pile::PileType;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Move {
     DrawCard,
     AutoMove(PileType, PileType),
@@ -34,7 +34,7 @@ impl Move {
 impl From<String> for Move {
     fn from(item: String) -> Move {
         let item = item.trim().to_uppercase();
-        let m = match item.len() {
+        match item.len() {
             1 => match &item[..] {
                 "D" => Move::DrawCard,
                 "H" => Move::Help,
@@ -60,8 +60,6 @@ impl From<String> for Move {
                 }
             }
             _ => Move::Invalid,
-        };
-        println!("{:?}", m);
-        m
+        }
     }
 }

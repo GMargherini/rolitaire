@@ -9,7 +9,7 @@ pub enum PileType {
     Draw,
     Uncovered,
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Pile {
     cards: Vec<Card>,
     pile_type: PileType,
