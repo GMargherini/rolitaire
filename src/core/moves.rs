@@ -3,6 +3,7 @@ use crate::pile::PileType;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Move {
+    AutoFinish,
     DrawCard,
     AutoMove(PileType, PileType),
     MoveCards(usize, PileType, PileType),
@@ -36,6 +37,7 @@ impl From<String> for Move {
         let item = item.trim().to_uppercase();
         match item.len() {
             1 => match &item[..] {
+                "A" => Move::AutoFinish,
                 "D" => Move::DrawCard,
                 "H" => Move::Help,
                 "L" => Move::History,

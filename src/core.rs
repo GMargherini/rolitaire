@@ -20,10 +20,12 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug)]
 pub enum Error {
+    NoAutoFinish,
     NoCardsMoved,
     InvalidMove,
     EmptyPile,
     Quit,
+    Win,
     Help,
 }
 
@@ -32,10 +34,14 @@ impl std::error::Error for Error {}
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Error::NoAutoFinish => {
+                write!(f, "Cannot autofinish, ensure that all cards are uncovered")
+            }
             Error::NoCardsMoved => write!(f, "No cards were moved"),
             Error::InvalidMove => write!(f, "Invalid move, try again"),
             Error::EmptyPile => write!(f, "The pile is empty"),
             Error::Quit => write!(f, "Exiting the game"),
+            Error::Win => write!(f, "Successfully autofinshed"),
             Error::Help => write!(f, "Help message"),
         }
     }
@@ -64,6 +70,7 @@ impl Game {
     pub fn play(&mut self, game_move: Move) -> Result<()> {
         self.history.push(self.table.clone());
         let move_result = match game_move {
+            Move::AutoFinish => self.auto_finish(),
             Move::DrawCard => self.table.draw_card(),
             Move::AutoMove(from, to) => self
                 .table
@@ -104,6 +111,23 @@ impl Game {
                     self.moves -= 1
                 };
             }
+        }
+    }
+
+    fn auto_finish(&mut self) -> Result<()> {
+        let lanes_uncovered = (0..7)
+            .all(|i| {
+                let lane = self.table().lane(i);
+                lane.cards().iter().all(|card| !card.is_covered())
+            });
+        let piles_empty =
+            self.table().draw_pile().is_empty() && self.table().uncovered_pile().is_empty();
+        if lanes_uncovered && piles_empty {
+            let moves: u32 = (0..7).map(|i| self.table().lane(i).length() as u32).sum();
+            self.moves += moves;
+            Err(Box::new(Error::Win))
+        } else {
+            Err(Box::new(Error::NoAutoFinish))
         }
     }
 

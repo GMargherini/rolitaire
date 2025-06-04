@@ -23,6 +23,7 @@ fn main() -> Result<()> {
                         clear_screen();
                         solitaire::print_help();
                     }
+                    Error::Win => break,
                     _ => {
                         let err = ansi_term::Colour::Red.paint(err.to_string());
                         eprintln!("{}", err);

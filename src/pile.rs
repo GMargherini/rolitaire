@@ -43,8 +43,8 @@ impl Pile {
         Vec::from(removed)
     }
 
-    pub fn cards(self) -> Vec<Card> {
-        self.cards
+    pub fn cards(&self) -> Vec<Card> {
+        self.cards.clone()
     }
 
     pub fn pile_type(&self) -> PileType {

@@ -1,4 +1,4 @@
-use ansi_term::Colour::{Black, Red, White, Green};
+use ansi_term::Colour::{Black, Green, Red, White};
 use std::fmt::{Display, Error, Formatter};
 use strum_macros::{EnumIter, FromRepr};
 
@@ -134,6 +134,7 @@ impl Display for Card {
     }
 }
 
+#[allow(dead_code)]
 fn repr(card: &Card) -> String {
     let mut s = String::from("1F0");
     s.push_str(match card.suit() {

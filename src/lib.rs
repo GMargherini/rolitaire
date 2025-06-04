@@ -43,6 +43,7 @@ pub fn print_table(table: &Table) {
 pub fn print_help() {
     println!(
         "Controls:\n
+    A                   Automatically finish the game if all cards are uncovered\n
     H                   Print help\n
     Q                   Quit game\n
     L                   Print move history\n
