@@ -1,3 +1,4 @@
+use ansi_term::Colour::{Black, Red, White, Green};
 use std::fmt::{Display, Error, Formatter};
 use strum_macros::{EnumIter, FromRepr};
 
@@ -93,10 +94,10 @@ impl Card {
 impl Display for Suit {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let suit = match self {
-            Suit::Clubs => "C",
-            Suit::Diamonds => "D",
-            Suit::Hearts => "H",
-            Suit::Spades => "S",
+            Suit::Clubs => "♣",
+            Suit::Diamonds => "♦",
+            Suit::Hearts => "♥",
+            Suit::Spades => "♠",
         };
 
         write!(f, "{}", suit)
@@ -119,14 +120,38 @@ impl Display for Rank {
 impl Display for Card {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         if self.is_covered() {
-            return write!(f, "\u{2587}\u{2587}\u{2587}");
+            let card = Green.paint("\u{2587}\u{2587}\u{2587}");
+            return write!(f, "{card}");
+            //return write!(f, " 🂠 ");
         }
         let card = format!("{}{}", self.rank, self.suit);
-
+        // let card = repr(self);
         let ansi = match self.colour() {
-            Colour::Red => ansi_term::Colour::Red.paint(card),
-            Colour::Black => ansi_term::Colour::White.paint(card),
+            Colour::Red => Red.on(White).paint(card),
+            Colour::Black => Black.on(White).paint(card),
         };
         write!(f, "{}", ansi)
     }
+}
+
+fn repr(card: &Card) -> String {
+    let mut s = String::from("1F0");
+    s.push_str(match card.suit() {
+        Suit::Clubs => "D",
+        Suit::Diamonds => "C",
+        Suit::Hearts => "B",
+        Suit::Spades => "A",
+    });
+    let rank = match card.rank() {
+        Rank::Ten => "A",
+        Rank::Jack => "B",
+        Rank::Queen => "D",
+        Rank::King => "E",
+        n => &(n as usize).to_string()[..],
+    };
+    s.push_str(rank);
+
+    let h = u32::from_str_radix(&s, 16).unwrap();
+    let c = char::from_u32(h).unwrap();
+    format!(" {} ", c)
 }
