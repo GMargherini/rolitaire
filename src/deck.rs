@@ -25,10 +25,9 @@ impl Deck {
     }
 
     pub fn pick_cards(&mut self, number: u8) -> Vec<Card> {
-        let options = (0..number)
-            .map(move |_| self.pick_card())
-            .collect::<Vec<Option<Card>>>();
-        options.iter().filter_map(|option| *option).collect()
+        (0..number)
+            .filter_map(move |_| self.pick_card())
+            .collect()
     }
 
     pub fn pick_all_cards(self) -> Vec<Card> {

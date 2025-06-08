@@ -9,6 +9,23 @@ pub enum PileType {
     Draw,
     Uncovered,
 }
+
+impl Display for PileType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let pile = match self {
+            PileType::Lane(n) => &format!("{n}")[..],
+            PileType::Suit(s) => match s {
+                card::Suit::Clubs => "C",
+                card::Suit::Diamonds => "D",
+                card::Suit::Hearts => "H",
+                card::Suit::Spades => "S",
+            },
+            PileType::Draw => "D",
+            PileType::Uncovered => "P",
+        };
+        write!(f, "{}", pile)
+    }
+}
 #[derive(Debug, Clone)]
 pub struct Pile {
     cards: Vec<Card>,
@@ -20,9 +37,13 @@ impl Pile {
         Pile { cards, pile_type }
     }
 
-    pub fn flip_top_card(&mut self) {
+    pub fn flip_top_card(&mut self) -> Pile {
         if let Some(card) = self.cards.last_mut() {
-            card.flip()
+            card.flip();
+        }
+        Pile {
+            cards: self.cards(),
+            pile_type: self.pile_type,
         }
     }
 
@@ -59,11 +80,11 @@ impl Pile {
             PileType::Uncovered => true,
             PileType::Draw => true,
             PileType::Suit(suit) => match self.top_card() {
-                Some(top_card) => card.suit() == suit && card > top_card,
+                Some(top_card) => card.suit() == suit && card.is_next(top_card),
                 None => card.suit() == suit && card.rank() == Rank::Ace,
             },
             PileType::Lane(_) => match self.top_card() {
-                Some(top_card) => top_card.colour() != card.colour() && top_card > card,
+                Some(top_card) => top_card.colour() != card.colour() && top_card.is_next(card),
                 None => card.rank() == Rank::King,
             },
         }
@@ -76,14 +97,12 @@ impl Pile {
         }
     }
 
-    pub fn remove_card(&mut self, card: &Card) {
+    pub fn remove_card(&mut self, card: &Card) -> Option<Card> {
         if let Some(index) = self.cards.iter().position(|c| c == card) {
-            self.cards.remove(index);
-        };
-    }
-
-    pub fn remove_cards(&mut self, n: usize) -> Vec<Card> {
-        self.cards.split_off(self.cards.len() - n)
+            Some(self.cards.remove(index))
+        } else {
+            None
+        }
     }
 
     pub fn remove_all_cards(&mut self) -> Vec<Card> {

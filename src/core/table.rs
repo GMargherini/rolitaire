@@ -24,26 +24,15 @@ impl Table {
     pub fn new() -> Table {
         let mut deck = Deck::new();
         let mut suit_piles = HashMap::new();
-        Suit::iter()
-            .map(|suit| {
-                (
-                    suit,
-                    Rc::new(RefCell::new(Pile::new(vec![], PileType::Suit(suit)))),
-                )
-            })
-            .map(|(suit, pile)| suit_piles.insert(suit, pile))
-            .count();
-        let mut lanes: Vec<PileRef> = (1..=7)
-            .map(|i| {
-                Rc::new(RefCell::new(Pile::new(
-                    deck.pick_cards(i),
-                    PileType::Lane(i as usize),
-                )))
-            })
+        for suit in Suit::iter() {
+            let pile = Rc::new(RefCell::new(Pile::new(vec![], PileType::Suit(suit))));
+            suit_piles.insert(suit, pile);
+        }
+        let lanes: Vec<PileRef> = (1..=7)
+            .map(|i| Pile::new(deck.pick_cards(i), PileType::Lane(i as usize)))
+            .map(|mut lane| lane.flip_top_card())
+            .map(|lane| Rc::new(RefCell::new(lane)))
             .collect();
-        lanes
-            .iter_mut()
-            .for_each(|lane| lane.borrow_mut().flip_top_card());
         let uncovered_pile = Rc::new(RefCell::new(Pile::new(vec![], PileType::Uncovered)));
         let draw_pile = Rc::new(RefCell::new(Pile::new(
             deck.pick_all_cards(),
@@ -74,7 +63,7 @@ impl Table {
         self.suit_piles[&suit].borrow()
     }
 
-    pub fn get_pile(&self, pile_type: PileType) -> PileRef {
+    fn get_pile(&self, pile_type: PileType) -> PileRef {
         match pile_type {
             PileType::Draw => PileRef::clone(&self.draw_pile),
             PileType::Uncovered => PileRef::clone(&self.uncovered_pile),
@@ -83,19 +72,17 @@ impl Table {
         }
     }
 
-    pub fn move_card(&self, card: Card, from: PileRef, to: PileRef) -> Result<()> {
+    fn move_card(&self, card: Card, from: PileRef, to: PileRef) -> Result<()> {
         let mut from = from.try_borrow_mut()?;
         let mut to = to.try_borrow_mut()?;
-        match (from.pile_type(), to.pile_type()) {
-            (PileType::Draw, PileType::Uncovered) => (),
-            (_, PileType::Uncovered) => {
-                return Err(Box::new(Error::InvalidMove));
-            }
-            _ => (),
+        if let PileType::Uncovered = to.pile_type() {
+            return Err(Box::new(Error::InvalidMove));
         }
-        let can_move = to.can_add(&card) && from.can_remove(&card);
-        if can_move {
-            from.remove_card(&card);
+        if to.can_add(&card) && from.can_remove(&card) {
+            let card = match from.remove_card(&card) {
+                Some(c) => c,
+                None => return Err(Box::new(Error::InvalidMove)),
+            };
             to.add_card(card);
             if from.top_card_is_covered() {
                 from.flip_top_card();
@@ -106,46 +93,15 @@ impl Table {
         }
     }
 
-    pub fn move_top_card(&self, from: PileRef, to: PileRef) -> Result<()> {
-        let mut from = from.try_borrow_mut()?;
-        let mut to = to.try_borrow_mut()?;
-        let mut card = *from.top_card().ok_or(Error::EmptyPile)?;
-        let can_move = to.can_add(&card) && from.can_remove(&card);
-        match (from.pile_type(), to.pile_type()) {
-            (PileType::Draw, PileType::Uncovered) => (),
-            (_, PileType::Uncovered) => {
-                return Err(Box::new(Error::InvalidMove));
-            }
-            _ => (),
-        }
-        if can_move {
-            let from_type = from.pile_type();
-            match from_type {
-                PileType::Draw => {
-                    card.flip();
-                    to.add_card(card);
-                    from.remove_top_card();
-                }
-                _ => {
-                    from.remove_top_card();
-                    to.add_card(card);
-                    if from.top_card_is_covered() {
-                        from.flip_top_card();
-                    }
-                }
-            }
-            Ok(())
-        } else {
-            Err(Box::new(Error::InvalidMove))
-        }
-    }
-
-    pub fn move_cards(&self, number: usize, from: PileRef, to: PileRef) -> Result<()> {
+    pub fn move_cards(&self, number: usize, from: PileType, to: PileType) -> Result<()> {
         if number == 0 {
             return Err(Box::new(Error::InvalidMove));
         }
+        let from = self.get_pile(from);
+        let to = self.get_pile(to);
         if number == 1 {
-            return self.move_top_card(Rc::clone(&from), Rc::clone(&to));
+            let card = *from.borrow().top_card().ok_or(Error::EmptyPile)?;
+            return self.move_card(card, Rc::clone(&from), Rc::clone(&to));
         }
         let cards = from.borrow().get_cards(number).clone();
         let results = cards
@@ -194,20 +150,23 @@ impl Table {
         }
     }
 
-    pub fn auto_move(&self, from: PileRef, to: PileRef) -> Result<()> {
+    pub fn auto_move(&self, from: PileType, to: PileType) -> Result<()> {
+        let from_type = from;
+        let to_type = to;
+        let from = self.get_pile(from_type);
+        let to = self.get_pile(to_type);
         if from.borrow().pile_type() == PileType::Uncovered {
-            return self.move_top_card(from, to);
+            let card = *from.borrow().top_card().ok_or(Error::EmptyPile)?;
+            return self.move_card(card, from, to);
         }
-        let is_valid = (1..=from.borrow().length())
-            .map(|n| self.is_move_valid(n, Rc::clone(&from), Rc::clone(&to)));
-        let index = is_valid
-            .into_iter()
+        let indexes = (1..=from.borrow().length())
+            .map(|n| self.is_move_valid(n, Rc::clone(&from), Rc::clone(&to)))
             .enumerate()
             .map(|(i, v)| if v { (i + 1) as u8 } else { 0_u8 })
             .filter(|i| *i != 0)
             .collect::<Vec<u8>>();
-        let index = *index.first().unwrap_or(&0);
-        self.move_cards(index as usize, from, to)
+        let index = *indexes.first().unwrap_or(&0);
+        self.move_cards(index as usize, from_type, to_type)
     }
 }
 

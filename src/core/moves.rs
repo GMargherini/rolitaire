@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::deck::card::Suit;
 use crate::pile::PileType;
 
@@ -63,5 +65,22 @@ impl From<String> for Move {
             }
             _ => Move::Invalid,
         }
+    }
+}
+
+impl Display for Move {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let m = match self {
+            Move::AutoFinish => "A",
+            Move::DrawCard => "D",
+            Move::AutoMove(from, to) => &format!("{}{}", from, to)[..],
+            Move::MoveCards(n, from, to) => &format!("{}{}{}", from, to, n)[..],
+            Move::History => "L",
+            Move::Help => "H",
+            Move::Undo => "U",
+            Move::Quit => "Q",
+            Move::Invalid => "I",
+        };
+        write!(f, "{}", m)
     }
 }

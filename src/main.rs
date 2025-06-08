@@ -23,6 +23,10 @@ fn main() -> Result<()> {
                         clear_screen();
                         solitaire::print_help();
                     }
+                    Error::History => {
+                        clear_screen();
+                        game.print_history();
+                    }
                     Error::Win => break,
                     _ => {
                         let err = ansi_term::Colour::Red.paint(err.to_string());

@@ -84,6 +84,14 @@ impl Card {
             State::Uncovered => State::Covered,
         }
     }
+
+    pub fn is_next(&self, other: &Card) -> bool {
+        if self <= other {
+            false
+        } else {
+            self.rank as u8 == other.rank as u8 + 1
+        }
+    }
 }
 
 impl PartialOrd for Card {
