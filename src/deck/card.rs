@@ -1,5 +1,8 @@
 use ansi_term::Colour::{Black, Green, Red, White};
-use std::fmt::{Display, Error, Formatter};
+use std::{
+    cmp::Ordering,
+    fmt::{Display, Error, Formatter},
+};
 use strum_macros::{EnumIter, FromRepr};
 
 #[derive(Debug, Copy, Clone, EnumIter, PartialEq, Eq, Hash)]
@@ -10,7 +13,7 @@ pub enum Suit {
     Spades,
 }
 
-#[derive(Debug, Clone, Copy, EnumIter, PartialEq, Eq, FromRepr)]
+#[derive(Debug, Clone, Copy, EnumIter, PartialEq, Eq, PartialOrd, Ord, FromRepr)]
 pub enum Rank {
     Ace = 1,
     Two = 2,
@@ -25,15 +28,6 @@ pub enum Rank {
     Jack = 11,
     Queen = 12,
     King = 13,
-}
-
-impl Rank {
-    pub fn is_next(r1: &Rank, r2: &Rank) -> bool {
-        match r2 {
-            Rank::King => false,
-            _ => &Rank::from_repr((*r2 as usize) + 1).unwrap() == r1,
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -89,6 +83,18 @@ impl Card {
             State::Covered => State::Uncovered,
             State::Uncovered => State::Covered,
         }
+    }
+}
+
+impl PartialOrd for Card {
+    fn partial_cmp(&self, other: &Card) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Card {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.rank.cmp(&other.rank)
     }
 }
 impl Display for Suit {

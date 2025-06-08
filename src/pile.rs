@@ -59,16 +59,11 @@ impl Pile {
             PileType::Uncovered => true,
             PileType::Draw => true,
             PileType::Suit(suit) => match self.top_card() {
-                Some(top_card) => {
-                    card.suit() == suit && Rank::is_next(&card.rank(), &top_card.rank())
-                }
+                Some(top_card) => card.suit() == suit && card > top_card,
                 None => card.suit() == suit && card.rank() == Rank::Ace,
             },
             PileType::Lane(_) => match self.top_card() {
-                Some(top_card) => {
-                    top_card.colour() != card.colour()
-                        && Rank::is_next(&top_card.rank(), &card.rank())
-                }
+                Some(top_card) => top_card.colour() != card.colour() && top_card > card,
                 None => card.rank() == Rank::King,
             },
         }
