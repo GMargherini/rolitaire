@@ -48,7 +48,12 @@ fn main() -> Result<()> {
     }
     clear_screen()?;
     let mut stdout = stdout().into_raw_mode()?;
-    writeln!(stdout, "{}You Won!", termion::cursor::Show)?;
+    writeln!(
+        stdout,
+        "{}You Won!{}",
+        termion::cursor::Show,
+        termion::cursor::Goto(1, 2)
+    )?;
     println!("{game}");
     Ok(())
 }
