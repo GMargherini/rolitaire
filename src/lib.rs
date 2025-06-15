@@ -7,7 +7,7 @@ pub mod core;
 pub mod deck;
 pub mod pile;
 
-const HELP_SCREEN: &'static str = "Controls:\n
+const HELP_SCREEN: &str = "Controls:\n
     A                   Automatically finish the game if all cards are uncovered\n
     ?                   Print help\n
     Q | Esc             Quit game\n
