@@ -7,12 +7,22 @@ pub mod core;
 pub mod deck;
 pub mod pile;
 
+const HELP_SCREEN: &'static str = "Controls:\n
+    A                   Automatically finish the game if all cards are uncovered\n
+    ?                   Print help\n
+    Q | Esc             Quit game\n
+    L                   Print move history\n
+    [Pile1][Pile2]      Automatically move cards from Pile1 to Pile2\n
+    N                   Draw a card from the uncovered pile\n
+    U | Backspace       Undo last move\n
+    Pile can be any among 1-7, P, C, D, H, S";
+
 pub fn setup() -> Game {
     Game::new()
 }
 
 pub fn print_table(table: &Table) {
-    println!(" D\t P\t\t C\u{2663}\t D\u{2666}\t H\u{2665}\t S\u{2660}");
+    println!(" N\t P\t\t C\u{2663}\t D\u{2666}\t H\u{2665}\t S\u{2660}");
     print!("{}\t{}\t\t", table.draw_pile(), table.uncovered_pile());
     let suit_piles = deck::card::Suit::iter().map(|suit| table.suit_pile(suit));
     suit_piles.for_each(|suit_pile| print!("{}\t", suit_pile));
@@ -41,16 +51,5 @@ pub fn print_table(table: &Table) {
 }
 
 pub fn print_help() {
-    println!(
-        "Controls:\n
-    A                   Automatically finish the game if all cards are uncovered\n
-    H                   Print help\n
-    Q                   Quit game\n
-    L                   Print move history\n
-    [Pile1][Pile2]      Automatically move cards from Pile1 to Pile2\n
-    [Pile1][Pile2][n]   Move n cards from Pile1 to Pile2\n
-    D                   Draw a card from the uncovered pile\n
-    U                   Undo last move\n
-    Pile can be any between 1-7, P, C, D, H, S"
-    );
+    println!("{}", HELP_SCREEN);
 }
