@@ -153,8 +153,9 @@ impl Game {
     }
 
     pub fn is_over(&self) -> bool {
-        let mut suit_piles = Suit::iter().map(|suit| self.table().suit_pile(suit));
-        suit_piles.all(|pile| pile.length() == 13)
+        Suit::iter()
+            .map(|suit| self.table().suit_pile(suit))
+            .all(|pile| pile.length() == 13)
     }
 }
 
