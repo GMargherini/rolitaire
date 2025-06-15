@@ -40,8 +40,8 @@ impl From<String> for Move {
         match item.len() {
             1 => match &item[..] {
                 "A" => Move::AutoFinish,
-                "D" => Move::DrawCard,
-                "H" => Move::Help,
+                "N" => Move::DrawCard,
+                "?" => Move::Help,
                 "L" => Move::History,
                 "Q" => Move::Quit,
                 "U" => Move::Undo,
@@ -72,11 +72,11 @@ impl Display for Move {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let m = match self {
             Move::AutoFinish => "A",
-            Move::DrawCard => "D",
+            Move::DrawCard => "N",
             Move::AutoMove(from, to) => &format!("{}{}", from, to)[..],
             Move::MoveCards(n, from, to) => &format!("{}{}{}", from, to, n)[..],
             Move::History => "L",
-            Move::Help => "H",
+            Move::Help => "?",
             Move::Undo => "U",
             Move::Quit => "Q",
             Move::Invalid => "I",
