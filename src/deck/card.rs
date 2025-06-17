@@ -134,7 +134,7 @@ impl Display for Rank {
 impl Display for Card {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         if self.is_covered() {
-            let card = Green.paint("\u{2587}\u{2587}\u{2587}");
+            let card = White.on(Green).paint("\u{2573}\u{2573}\u{2573}");
             return write!(f, "{card}");
             //return write!(f, " 🂠 ");
         }
