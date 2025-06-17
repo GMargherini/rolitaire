@@ -11,7 +11,13 @@ fn main() -> Result<()> {
         clear_screen()?;
         println!("\n{game}");
         solitaire::print_table(game.table());
-        let input = take_input()?;
+
+        let mut input = take_input();
+        while input.is_err() {
+            input = take_input()
+        }
+        let input = input?;
+
         let next_move = Move::from(input);
         if let Err(e) = game.play(next_move) {
             match e.downcast::<Error>() {
@@ -52,7 +58,7 @@ fn main() -> Result<()> {
         stdout,
         "{}You Won!{}",
         termion::cursor::Show,
-        termion::cursor::Goto(1, 2)
+        termion::cursor::Goto(1, 1)
     )?;
     println!("{game}");
     Ok(())
@@ -70,13 +76,23 @@ fn take_input() -> Result<String> {
             termion::cursor::Hide
         )?;
         let s = match k? {
+            Key::Char(' ') => {
+                write!(
+                    stdout,
+                    "{}{}",
+                    termion::cursor::Goto(1, 1),
+                    termion::clear::CurrentLine
+                )?;
+                stdout.flush()?;
+                return Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, ""))
+            },
             Key::Char('\n') => break,
-            Key::Char('l') => return Ok(String::from("L")),
+            Key::Char('l') | Key::Char('L') => return Ok(String::from("L")),
             Key::Char('?') => return Ok(String::from("?")),
-            Key::Char('n') => return Ok(String::from("N")),
-            Key::Char('a') => return Ok(String::from("A")),
-            Key::Backspace | Key::Char('u') => return Ok(String::from("U")),
-            Key::Esc | Key::Char('q') => return Ok(String::from("Q")),
+            Key::Char('n') | Key::Char('N') => return Ok(String::from("N")),
+            Key::Char('a') | Key::Char('A') => return Ok(String::from("A")),
+            Key::Backspace | Key::Char('u') | Key::Char('U') => return Ok(String::from("U")),
+            Key::Esc | Key::Char('q') | Key::Char('Q') => return Ok(String::from("Q")),
             Key::Char(c) => {
                 println!("{}", c.to_ascii_uppercase());
                 c

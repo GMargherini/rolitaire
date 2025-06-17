@@ -8,14 +8,15 @@ pub mod deck;
 pub mod pile;
 
 const HELP_SCREEN: &str = "Controls:\n
-    A                   Automatically finish the game if all cards are uncovered\n
     ?                   Print help\n
-    Q | Esc             Quit game\n
-    L                   Print move history\n
     [Pile1][Pile2]      Automatically move cards from Pile1 to Pile2\n
     N                   Draw a card from the uncovered pile\n
     U | Backspace       Undo last move\n
-    Pile can be any among 1-7, P, C, D, H, S";
+    A                   Automatically finish the game if all cards are uncovered\n
+    L                   Print move history\n
+    Space               Cancel input\n
+    Q | Esc             Quit game\n
+    Pile can be any of 1-7, P, C, D, H, S";
 
 pub fn setup() -> Game {
     Game::new()

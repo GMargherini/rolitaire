@@ -151,6 +151,9 @@ impl Table {
     }
 
     pub fn auto_move(&self, from: PileType, to: PileType) -> Result<()> {
+        if from == to {
+            return Err(Box::new(Error::InvalidMove));
+        }
         let from_type = from;
         let to_type = to;
         let from = self.get_pile(from_type);
