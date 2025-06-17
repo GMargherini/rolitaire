@@ -97,25 +97,21 @@ impl Table {
         if number == 0 {
             return Err(Box::new(Error::InvalidMove));
         }
-        let from = self.get_pile(from);
-        let to = self.get_pile(to);
+        let (from, to) = (self.get_pile(from), self.get_pile(to));
         if number == 1 {
             let card = *from.borrow().top_card().ok_or(Error::EmptyPile)?;
             return self.move_card(card, Rc::clone(&from), Rc::clone(&to));
         }
         let cards = from.borrow().get_cards(number).clone();
-        let results = cards
+        let err = cards
             .into_iter()
             .map(|card| self.move_card(card, Rc::clone(&from), Rc::clone(&to)))
-            .collect::<Vec<Result<()>>>();
-        for res in results {
-            if res.is_err() {
-                return res;
-            } else {
-                continue;
-            }
+            .find(|res| res.is_err());
+
+        match err {
+            Some(e) => e,
+            None => Ok(()),
         }
-        Ok(())
     }
 
     pub fn draw_card(&self) -> Result<()> {

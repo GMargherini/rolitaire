@@ -86,7 +86,6 @@ impl Game {
             Move::AutoFinish => self.auto_finish(),
             Move::DrawCard => self.table.draw_card(),
             Move::AutoMove(from, to) => self.table.auto_move(from, to),
-            Move::MoveCards(n, from, to) => self.table.move_cards(n, from, to),
             Move::Undo => {
                 self.undo();
                 Ok(())

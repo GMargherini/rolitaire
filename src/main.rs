@@ -84,8 +84,8 @@ fn take_input() -> Result<String> {
                     termion::clear::CurrentLine
                 )?;
                 stdout.flush()?;
-                return Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, ""))
-            },
+                return Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, ""));
+            }
             Key::Char('\n') => break,
             Key::Char('l') | Key::Char('L') => return Ok(String::from("L")),
             Key::Char('?') => return Ok(String::from("?")),

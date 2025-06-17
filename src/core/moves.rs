@@ -8,7 +8,6 @@ pub enum Move {
     AutoFinish,
     DrawCard,
     AutoMove(PileType, PileType),
-    MoveCards(usize, PileType, PileType),
     History,
     Help,
     Undo,
@@ -54,15 +53,6 @@ impl From<String> for Move {
                     _ => Move::Invalid,
                 }
             }
-            3 | 4 => {
-                let (piles, number) = (&item[..2], &item[2..]);
-                let n: usize = number.parse().unwrap_or(0);
-                let ps = Move::parse_piles(piles);
-                match &ps[..] {
-                    [Some(a), Some(b)] => Move::MoveCards(n, *a, *b),
-                    _ => Move::Invalid,
-                }
-            }
             _ => Move::Invalid,
         }
     }
@@ -74,7 +64,6 @@ impl Display for Move {
             Move::AutoFinish => "A",
             Move::DrawCard => "N",
             Move::AutoMove(from, to) => &format!("{}{}", from, to)[..],
-            Move::MoveCards(n, from, to) => &format!("{}{}{}", from, to, n)[..],
             Move::History => "L",
             Move::Help => "?",
             Move::Undo => "U",
