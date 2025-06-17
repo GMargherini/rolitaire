@@ -108,9 +108,7 @@ impl Game {
 
     fn undo(&mut self) {
         match self.moves {
-            0 => {
-                self.moves = 0;
-            }
+            0 => self.moves = 0,
             _ => {
                 self.history.pop();
                 if let Some(t) = self.history.pop() {
@@ -135,6 +133,10 @@ impl Game {
         println!("{s}");
     }
 
+    /// Automatically finishes the game
+    /// 
+    /// If all cards in the lanes are uncovered and the draw pile and uncovered pile are empty,
+    /// counts how many moves are left to win and updates the counter
     fn auto_finish(&mut self) -> Result<()> {
         let lanes_uncovered = (0..7).all(|i| {
             let lane = self.table().lane(i);

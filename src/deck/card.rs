@@ -85,6 +85,7 @@ impl Card {
         }
     }
 
+    /// Checks if the rank of this card comes right after `other`'s
     pub fn is_next(&self, other: &Card) -> bool {
         if self <= other {
             false

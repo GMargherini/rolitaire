@@ -20,7 +20,7 @@ impl Display for PileType {
                 card::Suit::Hearts => "H",
                 card::Suit::Spades => "S",
             },
-            PileType::Draw => "D",
+            PileType::Draw => "N",
             PileType::Uncovered => "P",
         };
         write!(f, "{}", pile)
@@ -58,12 +58,14 @@ impl Pile {
     pub fn card(&self, index: usize) -> Option<&Card> {
         self.cards.get(index)
     }
-
+    
+    /// Removes `number` cards from the pile and returns them
     pub fn get_cards(&self, number: usize) -> Vec<Card> {
         let removed = self.cards.split_at(self.cards.len() - number).1;
         Vec::from(removed)
     }
 
+    /// Returns all cards in the pile
     pub fn cards(&self) -> Vec<Card> {
         self.cards.clone()
     }
@@ -75,6 +77,8 @@ impl Pile {
     pub fn top_card(&self) -> Option<&Card> {
         self.cards.last()
     }
+
+    /// Checks if the given card can be added to this pile
     pub fn can_add(&self, card: &Card) -> bool {
         match self.pile_type {
             PileType::Uncovered => true,

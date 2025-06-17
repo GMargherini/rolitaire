@@ -75,6 +75,7 @@ impl Table {
     fn move_card(&self, card: Card, from: PileRef, to: PileRef) -> Result<()> {
         let mut from = from.try_borrow_mut()?;
         let mut to = to.try_borrow_mut()?;
+        
         if let PileType::Uncovered = to.pile_type() {
             return Err(Box::new(Error::InvalidMove));
         }
@@ -150,11 +151,10 @@ impl Table {
         if from == to {
             return Err(Box::new(Error::InvalidMove));
         }
-        let from_type = from;
-        let to_type = to;
-        let from = self.get_pile(from_type);
-        let to = self.get_pile(to_type);
-        if from.borrow().pile_type() == PileType::Uncovered {
+        let (from_type, to_type) = (from, to);
+        let (from, to) = (self.get_pile(from_type), self.get_pile(to_type));
+
+        if from_type == PileType::Uncovered {
             let card = *from.borrow().top_card().ok_or(Error::EmptyPile)?;
             return self.move_card(card, from, to);
         }
