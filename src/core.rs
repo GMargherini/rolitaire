@@ -134,7 +134,7 @@ impl Game {
     }
 
     /// Automatically finishes the game
-    /// 
+    ///
     /// If all cards in the lanes are uncovered and the draw pile and uncovered pile are empty,
     /// counts how many moves are left to win and updates the counter
     fn auto_finish(&mut self) -> Result<()> {

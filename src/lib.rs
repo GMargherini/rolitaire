@@ -14,8 +14,8 @@ const HELP_SCREEN: &str = "Controls:\n
     U | Backspace       Undo last move\n
     A                   Automatically finish the game if all cards are uncovered\n
     L                   Print move history\n
-    Space               Cancel input\n
-    Q | Esc             Quit game\n
+    Space | Esc         Cancel input\n
+    Q                   Quit game\n
     Pile can be any of 1-7, P, C, D, H, S";
 
 pub fn setup() -> Game {

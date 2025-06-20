@@ -75,7 +75,7 @@ impl Table {
     fn move_card(&self, card: Card, from: PileRef, to: PileRef) -> Result<()> {
         let mut from = from.try_borrow_mut()?;
         let mut to = to.try_borrow_mut()?;
-        
+
         if let PileType::Uncovered = to.pile_type() {
             return Err(Box::new(Error::InvalidMove));
         }
@@ -158,14 +158,14 @@ impl Table {
             let card = *from.borrow().top_card().ok_or(Error::EmptyPile)?;
             return self.move_card(card, from, to);
         }
-        let indexes = (1..=from.borrow().length())
+        let index = (1..=from.borrow().length())
             .map(|n| self.is_move_valid(n, Rc::clone(&from), Rc::clone(&to)))
             .enumerate()
-            .map(|(i, v)| if v { (i + 1) as u8 } else { 0_u8 })
-            .filter(|i| *i != 0)
-            .collect::<Vec<u8>>();
-        let index = *indexes.first().unwrap_or(&0);
-        self.move_cards(index as usize, from_type, to_type)
+            .filter(|(_, v)| *v)
+            .map(|(i, _)| i + 1)
+            .next()
+            .unwrap_or(0);
+        self.move_cards(index, from_type, to_type)
     }
 }
 

@@ -1,7 +1,6 @@
 use std::fmt::Display;
 
-use crate::deck::card::Suit;
-use crate::pile::PileType;
+use crate::{deck::card::Suit, pile::PileType};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Move {
@@ -63,7 +62,7 @@ impl Display for Move {
         let m = match self {
             Move::AutoFinish => "A",
             Move::DrawCard => "N",
-            Move::AutoMove(from, to) => &format!("{}{}", from, to)[..],
+            Move::AutoMove(from, to) => &format!("{} -> {}", from, to)[..],
             Move::History => "L",
             Move::Help => "?",
             Move::Undo => "U",

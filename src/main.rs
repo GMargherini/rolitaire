@@ -38,6 +38,7 @@ fn main() -> Result<()> {
                     }
                     Error::Win => break,
                     _ => {
+                        clear_screen()?;
                         let mut stdout = stdout().into_raw_mode()?;
                         let err = ansi_term::Colour::Red.paint(err.to_string());
                         write!(stdout, "{}{}", termion::cursor::Goto(1, 1), err)?;
@@ -46,19 +47,21 @@ fn main() -> Result<()> {
                 },
                 Err(err) => {
                     let err = ansi_term::Colour::Red.paint(format!("Internal error: {}", err));
+                    clear_screen()?;
                     eprintln!("{}", err);
                 }
             }
+            println!("\nPress Enter to continue");
             let _ = take_input();
         }
     }
     clear_screen()?;
     let mut stdout = stdout().into_raw_mode()?;
-    writeln!(
+    write!(
         stdout,
         "{}You Won!{}",
         termion::cursor::Show,
-        termion::cursor::Goto(1, 1)
+        termion::cursor::Goto(1, 2)
     )?;
     println!("{game}");
     Ok(())
@@ -76,7 +79,7 @@ fn take_input() -> Result<String> {
             termion::cursor::Hide
         )?;
         let s = match k? {
-            Key::Char(' ') => {
+            Key::Char(' ') | Key::Esc => {
                 write!(
                     stdout,
                     "{}{}",
@@ -84,7 +87,7 @@ fn take_input() -> Result<String> {
                     termion::clear::CurrentLine
                 )?;
                 stdout.flush()?;
-                return Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, ""));
+                return Err(std::io::Error::other("Move cancelled"));
             }
             Key::Char('\n') => break,
             Key::Char('l') | Key::Char('L') => return Ok(String::from("L")),
@@ -92,15 +95,14 @@ fn take_input() -> Result<String> {
             Key::Char('n') | Key::Char('N') => return Ok(String::from("N")),
             Key::Char('a') | Key::Char('A') => return Ok(String::from("A")),
             Key::Backspace | Key::Char('u') | Key::Char('U') => return Ok(String::from("U")),
-            Key::Esc | Key::Char('q') | Key::Char('Q') => return Ok(String::from("Q")),
+            Key::Char('q') | Key::Char('Q') => return Ok(String::from("Q")),
             Key::Char(c) => {
                 println!("{}", c.to_ascii_uppercase());
                 c
             }
             _ => return Ok(String::from("?")),
         };
-        let s = String::from(s);
-        input.push_str(&s[..]);
+        input.push(s);
         if input.len() == 2 {
             return Ok(input);
         }
