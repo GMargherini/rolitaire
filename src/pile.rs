@@ -58,7 +58,7 @@ impl Pile {
     pub fn card(&self, index: usize) -> Option<&Card> {
         self.cards.get(index)
     }
-    
+
     /// Removes `number` cards from the pile and returns them
     pub fn get_cards(&self, number: usize) -> Vec<Card> {
         let removed = self.cards.split_at(self.cards.len() - number).1;
