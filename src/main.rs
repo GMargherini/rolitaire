@@ -36,7 +36,18 @@ fn main() -> Result<()> {
                         game.print_history();
                         println!("Press Enter to continue");
                     }
-                    Error::Win => break,
+                    Error::Win => {
+                        clear_screen()?;
+                        let mut stdout = stdout().into_raw_mode()?;
+                        write!(
+                            stdout,
+                            "{}You Won!{}",
+                            termion::cursor::Show,
+                            termion::cursor::Goto(1, 2)
+                        )?;
+                        println!("{game}");
+                        break;
+                    }
                     _ => {
                         clear_screen()?;
                         let mut stdout = stdout().into_raw_mode()?;
@@ -55,15 +66,6 @@ fn main() -> Result<()> {
             let _ = take_input();
         }
     }
-    clear_screen()?;
-    let mut stdout = stdout().into_raw_mode()?;
-    write!(
-        stdout,
-        "{}You Won!{}",
-        termion::cursor::Show,
-        termion::cursor::Goto(1, 2)
-    )?;
-    println!("{game}");
     Ok(())
 }
 
