@@ -8,13 +8,13 @@ pub mod deck;
 pub mod pile;
 
 const HELP_SCREEN: &str = "Controls:\n
-    ?                   Print help\n
-    [Pile1][Pile2]      Automatically move cards from Pile1 to Pile2\n
-    N                   Draw a card from the uncovered pile\n
-    U | Backspace       Undo last move\n
-    A                   Automatically finish the game if all cards are uncovered\n
-    L                   Print move history\n
-    Space | Esc         Cancel input\n
+    ?                   Print help
+    [Pile1][Pile2]      Automatically move cards from Pile1 to Pile2
+    N                   Draw a card from the uncovered pile
+    U | Backspace       Undo last move
+    A                   Automatically finish the game if all cards are uncovered
+    L                   Print move history
+    Space | Esc         Cancel input
     Q                   Quit game\n
     Pile can be any of 1-7, P, C, D, H, S";
 

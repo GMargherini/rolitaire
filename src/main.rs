@@ -9,7 +9,7 @@ fn main() -> Result<()> {
     let mut game = solitaire::setup();
     while !game.is_over() {
         clear_screen()?;
-        println!("\n{game}");
+        println!("\n{game}\t\t\t?: display controls");
         solitaire::print_table(game.table());
 
         let mut input = take_input();
@@ -29,7 +29,6 @@ fn main() -> Result<()> {
                     Error::Help => {
                         clear_screen()?;
                         solitaire::print_help();
-                        println!("Press Enter to continue");
                     }
                     Error::History => {
                         clear_screen()?;
