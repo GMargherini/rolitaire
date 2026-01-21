@@ -10,13 +10,13 @@ pub mod pile;
 const HELP_SCREEN: &str = "Controls:\n
     ?                   Print help
     [Pile1][Pile2]      Automatically move cards from Pile1 to Pile2
-    N                   Draw a card from the uncovered pile
-    U | Backspace       Undo last move
-    A                   Automatically finish the game if all cards are uncovered
-    L                   Print move history
+    N | n               Draw a card from the uncovered pile
+    U | u | Backspace   Undo last move
+    A | a               Automatically finish the game if all cards are uncovered
+    L | l               Print move history
     Space | Esc         Cancel input
     Q                   Quit game\n
-    Pile can be any of 1-7, P, C, D, H, S";
+    Pile: 1-7 | [Pp] | [Cc] | [Dd] | [Hh] | [Ss]";
 
 pub fn setup() -> Game {
     Game::new()

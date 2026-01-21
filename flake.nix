@@ -13,9 +13,6 @@
         devShell = with pkgs; mkShell {
           buildInputs = [ cargo rustc rustfmt pre-commit rustPackages.clippy ];
           RUST_SRC_PATH = rustPlatform.rustLibSrc;
-        };
-        devShells.${system}.default = pkgs.mkShell
-        {
           packages = with pkgs; [
             rust-analyzer
           ];

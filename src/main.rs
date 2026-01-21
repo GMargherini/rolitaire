@@ -96,7 +96,7 @@ fn take_input() -> Result<String> {
             Key::Char('n') | Key::Char('N') => return Ok(String::from("N")),
             Key::Char('a') | Key::Char('A') => return Ok(String::from("A")),
             Key::Backspace | Key::Char('u') | Key::Char('U') => return Ok(String::from("U")),
-            Key::Char('q') | Key::Char('Q') => return Ok(String::from("Q")),
+            Key::Char('Q') => return Ok(String::from("Q")),
             Key::Char(c) => {
                 println!("{}", c.to_ascii_uppercase());
                 c
